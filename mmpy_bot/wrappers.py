@@ -71,6 +71,28 @@ class Message(EventWrapper):
         return self.body["data"].get("team_id", "").strip()
 
 
+class Reaction(EventWrapper):
+    @cached_property
+    def event(self):
+        return self.body["event"]
+    
+    @cached_property
+    def user_id(self):
+        return self.body["data"]["reaction"]["user_id"]
+    
+    @cached_property
+    def post_id(self):
+        return self.body["data"]["reaction"]["post_id"]
+    
+    @cached_property
+    def channel_id(self):
+        return self.body["data"]["broadcast"]["channel_id"]
+
+    @cached_property
+    def emoji_name(self):
+        return self.body["data"]["reaction"]["emoji_name"]
+
+
 class WebHookEvent(EventWrapper):
     """Wrapper around an incoming webhook post request.
 

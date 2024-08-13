@@ -155,6 +155,7 @@ class PluginManager:
         self.webhook_listeners: Dict[re.Pattern, List[WebHookFunction]] = defaultdict(
             list
         )
+        self.reaction_listeners: List[ReactionFunction] = []
 
     def initialize(self, driver: Driver, settings: Settings):
         for plugin in self.plugins:

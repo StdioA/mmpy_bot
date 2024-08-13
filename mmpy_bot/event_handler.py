@@ -8,7 +8,7 @@ from mmpy_bot.driver import Driver
 from mmpy_bot.plugins import PluginManager
 from mmpy_bot.settings import Settings
 from mmpy_bot.webhook_server import NoResponse
-from mmpy_bot.wrappers import Message, WebHookEvent
+from mmpy_bot.wrappers import Message, WebHookEvent, Reaction
 
 log = logging.getLogger("mmpy.event_handler")
 
@@ -55,6 +55,8 @@ class EventHandler:
         event_action = post.get("event")
         if event_action == "posted":
             await self._handle_post(post)
+        elif event_action in ("reaction_added", "reaction_removed"):
+            await self._handle_reaction(post)
 
     async def _handle_post(self, post):
         # For some reason these are JSON strings, so need to parse them first
@@ -87,6 +89,17 @@ class EventHandler:
 
         # Execute the callbacks in parallel
         asyncio.gather(*tasks)
+    
+    async def _handle_reaction(self, event):
+        if "reaction" in event["data"]:
+            event["data"]["reaction"] = json.loads(event["data"]["reaction"])
+        message = Reaction(event)
+        # Ignore the reaction from ourself
+        if message.user_id == self.driver.user_id:
+            return
+
+        # Find all the listeners that match this message, and have their plugins handle
+        # the rest.
 
     async def _handle_webhook(self, event: WebHookEvent):
         # Find all the listeners that match this webhook id, and have their plugins
